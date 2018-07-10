@@ -1,0 +1,273 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration build-checksum="1098507522" file="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\MonitorProgress.prj" location="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack" name="MonitorProgress" preferred-package-location="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\MonitorProgress\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>MonitorProgress</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>2.02</param.version>
+    <param.authnamewatermark>Till Korten</param.authnamewatermark>
+    <param.email />
+    <param.company />
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.guid />
+    <param.installpath.string>\MonitorProgress\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\MonitorProgress\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\MonitorProgress\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\MonitorProgress\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\MonitorProgress</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.embed.ctf>true</param.embed.ctf>
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.email />
+      <param.company />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.embed.ctf />
+      <param.target.type />
+      <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\monitorProgress.m</file>
+    </fileset.main>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\assets\blank.gif</file>
+      <file>${PROJECT_ROOT}\assets\Done_16px.png</file>
+      <file>${PROJECT_ROOT}\assets\folder_16.png</file>
+      <file>${PROJECT_ROOT}\assets\image_16.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_1.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_10.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_11.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_12.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_2.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_3.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_4.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_5.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_6.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_7.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_8.png</file>
+      <file>${PROJECT_ROOT}\assets\progress_9.png</file>
+      <file>${PROJECT_ROOT}\assets\warning_16.png</file>
+    </fileset.resources>
+    <fileset.package />
+    <fileset.depfun>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\AutoTipTrackDataClass.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\loadMiddleImage.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readImageJTiffMeta.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readManyTiffs.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readMMTiffMeta.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readMultilayerTiff.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readND2.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readNikonTiffMeta.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\readStack.m</file>
+      <file>${PROJECT_ROOT}\@AutoTipTrackDataClass\stackRead.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\autoTipTrack.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\averagePath.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\calculateThreshold.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\connectTracks.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\evaluateData.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\featureConnect.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\fitPath.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\fitPathsToTracks.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\generatePaths.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\QueueElementClass.m</file>
+      <file>${PROJECT_ROOT}\@QueueElementClass\trackTips.m</file>
+      <file>${PROJECT_ROOT}\autoscale.m</file>
+      <file>${PROJECT_ROOT}\bfmatlab\bfCheckJavaMemory.m</file>
+      <file>${PROJECT_ROOT}\bfmatlab\bfCheckJavaPath.m</file>
+      <file>${PROJECT_ROOT}\bfmatlab\bfGetPlane.m</file>
+      <file>${PROJECT_ROOT}\bfmatlab\bfGetReader.m</file>
+      <file>${PROJECT_ROOT}\bfmatlab\private\is_octave.m</file>
+      <file>${PROJECT_ROOT}\ConfigClass.m</file>
+      <file>${PROJECT_ROOT}\distance2curve.m</file>
+      <file>${PROJECT_ROOT}\enqueueExperiment.m</file>
+      <file>${PROJECT_ROOT}\enqueueManyExperiments.m</file>
+      <file>${PROJECT_ROOT}\EvalGui.m</file>
+      <file>${PROJECT_ROOT}\fDefStructure.m</file>
+      <file>${PROJECT_ROOT}\flattenImage.m</file>
+      <file>${PROJECT_ROOT}\fPlaceFig.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\abs.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\atan.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\atan2.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\average.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\ceil.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\char.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\cos.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\display.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\double.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\double_error.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\end.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\eq.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\fix.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\floor.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\ge.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\gt.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\horzcat.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\isnumeric.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\le.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\length.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\lt.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\max.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\mean.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\min.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\minus.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\mod.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\mtimes.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\ne.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\norm.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\numel.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\plus.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\power.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\prod.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\rdivide.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\real.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\repmat.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\reshape.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\round.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\sin.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\size.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\sqrt.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\subsasgn.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\sum.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\tan.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\times.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\transpose.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\uminus.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\uplus.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\@double_error\vertcat.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Bw.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\debug\PlotRect.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\ErrorEvents.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\findInterjectingFitboxes.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\FineScan.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentEnd\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentEnd\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentEnd\Model2DFilamentEnd.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentEnd\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentEnd\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddle\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddle\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddle\Model2DFilamentMiddle.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddle\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddle\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\Model2DFilamentMiddleBend.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DFilamentMiddleBend\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\Model2DGaussPlus2Rings.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlus2Rings\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlusRing\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlusRing\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlusRing\Model2DGaussPlusRing.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlusRing\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussPlusRing\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussStreched\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussStreched\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussStreched\Model2DGaussStreched.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussStreched\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussStreched\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussSymmetric\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussSymmetric\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussSymmetric\Model2DGaussSymmetric.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussSymmetric\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DGaussSymmetric\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DShortFilament\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DShortFilament\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DShortFilament\Model2DShortFilament.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DShortFilament\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@Model2DShortFilament\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\evaluate.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\getParameter.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\ModelNeg2DGaussPlusRing.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\subsref.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\@ModelNeg2DGaussPlusRing\transformResult.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\CoD2String.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\Fit2D.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\GaussianStrip.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\GaussianStripBend.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Fit2D\HalfPlane.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\FitPic.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\getClusters.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\InterpolateData.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\ObjectIDs.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\Pic.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\RoughScan.m</file>
+      <file>${PROJECT_ROOT}\imageprocessing\ScanImage.m</file>
+      <file>${PROJECT_ROOT}\Logger.m</file>
+      <file>${PROJECT_ROOT}\parseXMLString.m</file>
+      <file>${PROJECT_ROOT}\strendswith.m</file>
+      <file>${PROJECT_ROOT}\strstartswith.m</file>
+      <file>${PROJECT_ROOT}\trackStatus.m</file>
+      <file>${PROJECT_ROOT}\xmlreadstring.m</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\MonitorProgress\for_testing" name="readme.txt" optional="true">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\MonitorProgress\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\MonitorProgress\for_testing" name="MonitorProgress.exe" optional="false">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\MonitorProgress\for_testing\MonitorProgress.exe</file>
+      <file location="${PROJECT_ROOT}\MonitorProgress\for_testing" name="splash.png" optional="false">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\MonitorProgress\for_testing\splash.png</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2016a</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>6.1</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

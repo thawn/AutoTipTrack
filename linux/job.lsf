@@ -1,0 +1,9 @@
+#!/bin/bash
+#### job.lsf ####
+#BSUB -q short
+#BSUB -W 1:00
+#BSUB -J "AutoTipTrack"
+#BSUB -n 12
+#BSUB -o %J.out
+./run_evaluateManyExperiments.sh /scratch/users/korten/for_testing/ 12
+#### end of job.lsf ####

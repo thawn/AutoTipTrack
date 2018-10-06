@@ -762,12 +762,21 @@ classdef InteractiveGUI < AutoTipTrackDataClass
         'Position',[0 0 1 1],...
         'Visible','off');
       
+      I.Interface.ThresholdTab.AnnotateTrainingButton = uicontrol(...
+        'Parent',I.Interface.ThresholdTab.MainTab,...
+        'Units','normalized',...
+        'String','annotate training data',...
+        'Style','pushbutton',...
+        'Position',[BtnX 3 * BtnSpacing BtnW BtnH],...
+        'Callback',@I.annotateTrainingData,...
+        'Tag','CancelButton');
+      
       I.Interface.ThresholdTab.CancelButton = uicontrol(...
         'Parent',I.Interface.ThresholdTab.MainTab,...
         'Units','normalized',...
         'String','cancel',...
         'Style','pushbutton',...
-        'Position',[BtnX 0.24 BtnW BtnH],...
+        'Position',[BtnX 2 * BtnSpacing BtnW BtnH],...
         'Callback',@I.close,...
         'Tag','CancelButton');
       
@@ -776,7 +785,7 @@ classdef InteractiveGUI < AutoTipTrackDataClass
         'Units','normalized',...
         'String','save as file specific config',...
         'Style','pushbutton',...
-        'Position',[BtnX 0.12 BtnW BtnH],...
+        'Position',[BtnX 1 * BtnSpacing BtnW BtnH],...
         'Callback',@I.saveFileSpecificConfig,...
         'Tag','SaveFileSpecificButton');
       
@@ -790,7 +799,7 @@ classdef InteractiveGUI < AutoTipTrackDataClass
         'Tag','SaveGeneralButton');
     end
     
-    
+        
     function disableBGSubtraction(I, ~, ~)
       I.Interface.ThresholdTab.RadiusSlider.Enable = 'off';
       I.Interface.ThresholdTab.RadiusSlider.Min = 0;
@@ -1017,16 +1026,21 @@ classdef InteractiveGUI < AutoTipTrackDataClass
     end
     
     
+    function FlatImage = createFlatImage(I,Frame)
+      BallRadius=round(get(I.Interface.ThresholdTab.RadiusSlider,'Value'));
+      Smoothe=get(I.Interface.ThresholdTab.SmootheSlider,'Value');
+      if BallRadius > 0
+        FlatImage = flattenImage(I.Stack{Frame},BallRadius,Smoothe);
+      else
+        FlatImage = I.Stack{round(get(I.Interface.ThresholdTab.FrameSlider,'Value'))};
+      end
+    end
+    
+    
     function updateThresholdImages(I,hObj,~)
       I.syncSliders(get(hObj,'Tag'));
       if ~isfield(I.Interface.ThresholdTab,'FlatImage')
-        BallRadius=round(get(I.Interface.ThresholdTab.RadiusSlider,'Value'));
-        Smoothe=get(I.Interface.ThresholdTab.SmootheSlider,'Value');
-        if BallRadius > 0
-          I.Interface.ThresholdTab.FlatImage=flattenImage(I.Stack{round(get(I.Interface.ThresholdTab.FrameSlider,'Value'))},BallRadius,Smoothe);
-        else
-          I.Interface.ThresholdTab.FlatImage=I.Stack{round(get(I.Interface.ThresholdTab.FrameSlider,'Value'))};
-        end
+        I.Interface.ThresholdTab.FlatImage = I.createFlatImage(round(get(I.Interface.ThresholdTab.FrameSlider,'Value')));
       end
       I.rescaleSlider(I.Interface.ThresholdTab.ScaleSlider,I.Interface.ThresholdTab.FlatImage)
       imshow(I.Interface.ThresholdTab.FlatImage,[0, get(I.Interface.ThresholdTab.ScaleSlider,'Value') ],'Parent',I.Interface.ThresholdTab.FlattenedAxes,'Border','tight');
@@ -1034,6 +1048,94 @@ classdef InteractiveGUI < AutoTipTrackDataClass
       imshow(ThreshImage,[0, 1 ],'Parent',I.Interface.ThresholdTab.ThresholdAxes,'Border','tight');
       drawnow;
     end
+    
+    
+    function I = annotateTrainingData(I, ~, ~)
+      Fig = figure('Units', 'normalized');
+      Ax = axes(Fig);
+      Fig.Units = 'normalized';
+      Fig.Position = [0.05 0.05 0.9 0.9];
+      Ax.Position = [0 0 1 1];
+      MaxFrame = round(I.Interface.ThresholdTab.FrameSlider.Max);
+      CurrentFrame = round(I.Interface.ThresholdTab.FrameSlider.Value);
+      Width = size(I.Interface.ThresholdTab.FlatImage,2);
+      Height = size(I.Interface.ThresholdTab.FlatImage,1);
+      AnnotationFile = fullfile(I.Config.Directory, [I.Config.StackName '_Annotation.tif']);
+      if ~ isfield(I.Interface.ThresholdTab, 'AnnotatedData')
+        I.Interface.ThresholdTab.AnnotatedData = false(Height, Width, MaxFrame);
+        if exist(AnnotationFile,'file') == 2
+          TiffMeta=imfinfo(AnnotationFile);
+          NumF=numel(TiffMeta);
+          if NumF > MaxFrame
+            NumF = MaxFrame;
+          end
+          for n = 1:NumF
+            I.Interface.ThresholdTab.AnnotatedData(:,:,n) = imread(AnnotationFile,'tif','Info',TiffMeta,'Index',n);
+          end
+          delete(AnnotationFile);
+          if CurrentFrame > 1
+            if CurrentFrame < NumF
+              MaxRestore = CurrentFrame;
+            else
+              MaxRestore = NumF;
+            end
+            for n=1:MaxRestore
+              imwrite(I.Interface.ThresholdTab.AnnotatedData(:,:,n), AnnotationFile, 'writemode', 'append', 'Compression', 'none');
+            end
+          end
+        end
+      end
+      while CurrentFrame <= MaxFrame
+        I.Interface.ThresholdTab.AnnotatedData(:,:,CurrentFrame) = I.annotateThresholdImage(CurrentFrame,Ax,I.Interface.ThresholdTab.AnnotatedData(:,:,CurrentFrame));
+        imwrite(I.Interface.ThresholdTab.AnnotatedData(:,:,CurrentFrame), AnnotationFile, 'writemode', 'append', 'Compression', 'none');
+        CurrentFrame = CurrentFrame +1;
+        if CurrentFrame <= MaxFrame
+          I.Interface.ThresholdTab.FrameSlider.Value = CurrentFrame;
+        end
+        I.updateFlattenedImage(I.Interface.ThresholdTab.FrameSlider);
+      end
+      close(Fig);
+    end
+    
+    
+    function Annotation = annotateThresholdImage(I, CurrentFrame, Ax, InputRegion)
+      Fig = Ax.Parent;
+      ThreshImage = I.calculateThreshImage(I.Interface.ThresholdTab.FlatImage,I.getThresholdValue);
+      Mask = ~ThreshImage;
+      ColorIndex = [0.2, 0.2, 0.2; .5 .5 0; 0 0 .5; 1, 1, 1; 1, 0 0];
+      if CurrentFrame > 1
+        DisplayImage = uint16(I.calculateThreshImage(I.createFlatImage(CurrentFrame - 1),I.getThresholdValue));
+      else
+        DisplayImage = uint16(zeros(size(ThreshImage)));
+      end
+      if CurrentFrame < round(I.Interface.ThresholdTab.FrameSlider.Max)
+        ThreshImage2 = I.calculateThreshImage(I.createFlatImage(CurrentFrame + 1),I.getThresholdValue);
+        DisplayImage(ThreshImage2) = 2;
+      end
+      DisplayImage(ThreshImage) = 3;
+      DisplayImage(InputRegion) = 4;
+      X = 0;
+      while ~isempty(X)
+        imshow(DisplayImage, ColorIndex, 'Parent', Ax, 'Border', 'tight', 'InitialMagnification', 2);
+        drawnow;
+        [X, Y, Button] = ginput2(1, 'Figure', Fig);
+        X = round(X);
+        Y = round(Y);
+        if ~isempty(X) && X>0 && Y>0 && ThreshImage(Y, X)
+          NewRegion = xor(Mask, imfill(Mask, [Y, X]));
+          if Button == 1
+            DisplayImage(NewRegion) = 4;
+          elseif Button == 3
+            DisplayImage(NewRegion) = 3;
+          else
+            Mask(Y, X) = 1;
+            DisplayImage(Y, X) = 0;
+          end
+        end
+      end
+      Annotation = DisplayImage == 4;
+    end
+
     
     %% closing UI
     function close(I,~,~)

@@ -20,11 +20,19 @@ function [ objects, params, bw ] = RoughScan( params )
   if params.display>0
     params.logger.Log( 'create black&white image', params.display );
   end
-  % converting imgage to black and white
-  params.bw = Bw( params );
   
-  % estimate background level
-  params.background = mean( params.pic.pic( params.bw.bw == 0 ) );
+  % we only create the black and white image if it was not already loaded
+  % from a file (in autoTipTrack.m)
+  if ~params.LoadThreshold
+    % converting imgage to black and white
+    params.bw = Bw( params );
+    % estimate background level
+    params.background = mean( params.pic.pic( params.bw.bw == 0 ) );
+  else
+    % estimate background level
+    bgbw = Bw( params );
+    params.background = mean( params.pic.pic( bgbw.bw == 0 ) );
+  end
   
   % choose regions to fit, if they are present
   if isfield( params, 'bw_regions' )

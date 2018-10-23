@@ -767,9 +767,18 @@ classdef InteractiveGUI < AutoTipTrackDataClass
         'Units','normalized',...
         'String','annotate training data',...
         'Style','pushbutton',...
-        'Position',[BtnX 3 * BtnSpacing BtnW BtnH],...
+        'Position',[BtnX 4 * BtnSpacing BtnW BtnH],...
         'Callback',@I.annotateTrainingData,...
-        'Tag','CancelButton');
+        'Tag','AnnotateTrainingButton');
+      
+      I.Interface.ThresholdTab.SaveThresholdButton = uicontrol(...
+        'Parent',I.Interface.ThresholdTab.MainTab,...
+        'Units','normalized',...
+        'String','save threshold stack',...
+        'Style','pushbutton',...
+        'Position',[BtnX 3 * BtnSpacing BtnW BtnH],...
+        'Callback',@I.saveThreshold,...
+        'Tag','SaveThresholdButton');
       
       I.Interface.ThresholdTab.CancelButton = uicontrol(...
         'Parent',I.Interface.ThresholdTab.MainTab,...
@@ -974,17 +983,6 @@ classdef InteractiveGUI < AutoTipTrackDataClass
     end
     
     
-    function updateThreshold(I,hObj,~)
-      I.syncSliders(get(hObj,'Tag'));
-      I.updateThresholdImages(hObj);
-    end
-    
-    
-    function Thresh=getThresholdValue(I)
-      Thresh=complex(0,get(I.Interface.ThresholdTab.ThreshSlider,'Value'));
-    end
-    
-    
     function rescaleSlider(I,ScaleSlider,Image,TabName)
       if nargin<4
         TabName='ThresholdTab';
@@ -1037,6 +1035,17 @@ classdef InteractiveGUI < AutoTipTrackDataClass
     end
     
     
+    function updateThreshold(I,hObj,~)
+      I.syncSliders(get(hObj,'Tag'));
+      I.updateThresholdImages(hObj);
+    end
+    
+    
+    function Thresh=getThresholdValue(I)
+      Thresh=complex(0,get(I.Interface.ThresholdTab.ThreshSlider,'Value'));
+    end
+    
+    
     function updateThresholdImages(I,hObj,~)
       I.syncSliders(get(hObj,'Tag'));
       if ~isfield(I.Interface.ThresholdTab,'FlatImage')
@@ -1047,6 +1056,20 @@ classdef InteractiveGUI < AutoTipTrackDataClass
       ThreshImage=I.calculateThreshImage(I.Interface.ThresholdTab.FlatImage,I.getThresholdValue);
       imshow(ThreshImage,[0, 1 ],'Parent',I.Interface.ThresholdTab.ThresholdAxes,'Border','tight');
       drawnow;
+    end
+    
+    
+    function saveThreshold(I, ~, ~)
+      ThresholdFile = fullfile(I.Config.Directory, [I.Config.StackName '_Threshold.tif']);
+      if exist(ThresholdFile,'file') == 2
+        delete(ThresholdFile);
+        drawnow;
+      end
+      Threshold = I.getThresholdValue;
+      for n = 1:length(I.Stack)
+        ThreshImage = I.calculateThreshImage(I.createFlatImage(n),Threshold);
+        imwrite(ThreshImage, ThresholdFile, 'writemode', 'append', 'Compression', 'none');
+      end
     end
     
     
@@ -1073,9 +1096,10 @@ classdef InteractiveGUI < AutoTipTrackDataClass
             I.Interface.ThresholdTab.AnnotatedData(:,:,n) = imread(AnnotationFile,'tif','Info',TiffMeta,'Index',n);
           end
           delete(AnnotationFile);
+          drawnow;
           if CurrentFrame > 1
             if CurrentFrame < NumF
-              MaxRestore = CurrentFrame;
+              MaxRestore = CurrentFrame - 1;
             else
               MaxRestore = NumF;
             end

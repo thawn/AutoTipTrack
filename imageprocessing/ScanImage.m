@@ -30,7 +30,13 @@ function [objects, bw] = ScanImage( image, params, idx )
   if numel( params.threshold ) >1
     params.threshold = params.threshold(real(idx));
   end
-
+  
+  % if there are saved threshold images, load the one corresponding to the
+  % current frame
+  if params.LoadThreshold
+    params.bw = Bw;
+    params.bw.bw = imread(params.ThresholdFile,'tif','Info',params.ThreshTiffMeta,'Index',params.ThreshPlanesUsed(real(idx))) > 128;
+  end
   %{
    if params.display > 1 % graphical debug enabled
     % add debug directory

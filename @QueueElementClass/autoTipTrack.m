@@ -69,6 +69,15 @@ params.threshold=Q.calculateThreshold(Q.Config,Q.Stack);
 if params.display > 0
   params.logger = Logger('logfile.txt');
 end
+ThresholdFile = fullfile(Q.Config.Directory,[Q.Config.StackName '_Threshold.tif']);
+params.LoadThreshold = false;
+if exist(ThresholdFile,'file') == 2
+  %if there is already a threshold stack
+  params.LoadThreshold = true;
+  params.ThresholdFile = ThresholdFile;
+  params.ThreshTiffMeta=imfinfo(ThresholdFile);
+  params.ThreshPlanesUsed = Q.Config.FirstTFrame:Q.Config.LastFrame;
+end
 Q.Objects = cell(size(Q.Stack));
 thresholdStack=cell(size(Q.Stack));
 % Check if there is a parallel pool available and if we should use

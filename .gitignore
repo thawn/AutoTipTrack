@@ -46,3 +46,6 @@ for_testing/
 AutoTipTrack_testcases
 current_test
 test/
+
+#AutoTipTrack logfile
+logfile.txt

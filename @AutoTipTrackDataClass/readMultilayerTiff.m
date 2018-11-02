@@ -43,7 +43,13 @@ if isfield(TiffMeta(1), 'ImageDescription')
     if isempty(A.Config.AcquisitionDate)
       %try to extract the AcquisitionDate from the imagej info data
       %instead of the bioformats metadata
-      ImageJDescription=char(TiffMeta(1).UnknownTags(2).Value);
+      if isfield(TiffMeta,'ImageDescription') && strstartswith(TiffMeta(1).ImageDescription, 'ImageJ')
+        ImageJDescription = TiffMeta(1).ImageDescription;
+      elseif isfield(TiffMeta,UnknownTags)
+        ImageJDescription = char(TiffMeta(1).UnknownTags(2).Value);
+      else
+        ImageJDescription = '';
+      end
       ImageJDescription(ImageJDescription==char(0))=[];
       ImageJDescription=strsplit(ImageJDescription,char(10));
       DateTimePattern=char('DateTime: ');

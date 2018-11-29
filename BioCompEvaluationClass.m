@@ -847,8 +847,8 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       UserData.ImageAxes = axes(UI,'Position', [0, 0, 1 - NormalizedControlWidth, 1],...
         'DataAspectRatioMode', 'manual', 'DataAspectRatio', [1 1 1]);
       UserData.Rotate = p.Results.Rotate;
-      UserData.JunctionImagePos = JunctionImagePos;
-      UserData.JunctionImageSize = JunctionImageSize;
+      UserData.JunctionImagePos = round(JunctionImagePos);
+      UserData.JunctionImageSize = round(JunctionImageSize);
       UserData.XLim = [JunctionImagePos(1), JunctionImagePos(1) + JunctionImageSize(1)];
       UserData.YLim = [JunctionImagePos(2), JunctionImagePos(2) + JunctionImageSize(2)];
       Frames = size(B.Molecule(MoleculeList(UserData.CurrentMolecule)).Results,1);

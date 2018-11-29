@@ -575,11 +575,12 @@ classdef InteractiveGUI < AutoTipTrackDataClass
     
     function I=drawRectangles(I)
       if isfield(I.Interface.PatternTab,'Rect')
-        I.Interface.PatternTab.Rect.delete;
+        R = findall(I.Interface.PatternTab.MaximumProjAxes, 'Tag', 'WhiteRect');
+        R.delete;
       end
       for n=size(I.Interface.PatternTab.RectPos,1):-1:1
-        I.Interface.PatternTab.Rect(n)=rectangle('Parent',I.Interface.PatternTab.MaximumProjAxes,...
-          'Position',[I.Interface.PatternTab.RectPos(n,:) I.Interface.PatternTab.RectSize],'EdgeColor','w');
+        I.Interface.PatternTab.Rect(n) = rectangle('Parent', I.Interface.PatternTab.MaximumProjAxes, ...
+          'Position',[I.Interface.PatternTab.RectPos(n,:) I.Interface.PatternTab.RectSize], 'EdgeColor', 'w', 'Tag', 'WhiteRect');
       end
       %drawnow;
     end

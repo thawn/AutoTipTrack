@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="2599897516" file="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\CreateConfigWin64.prj" location="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack" name="CreateConfigWin64" preferred-package-location="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\CreateConfigWin64\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="1840249980" file="C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\CreateConfigWin64.prj" location="C:\Users\DiezLab\Documents\GitHub\AutoTipTrack" name="CreateConfigWin64" preferred-package-location="C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\CreateConfigWin64\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>CreateConfigWin64</param.appname>
     <param.icon />
     <param.icons />
@@ -22,7 +22,6 @@
     <param.logdir>${PROJECT_ROOT}\CreateConfigWin64</param.logdir>
     <param.enable.clean.build>false</param.enable.clean.build>
     <param.user.defined.mcr.options />
-    <param.embed.ctf>true</param.embed.ctf>
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
     <param.web.mcr>true</param.web.mcr>
@@ -34,6 +33,10 @@
     <param.windows.command.prompt>true</param.windows.command.prompt>
     <param.create.log>false</param.create.log>
     <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text />
     <unset>
       <param.icon />
       <param.icons />
@@ -45,6 +48,7 @@
       <param.guid />
       <param.installpath.combo />
       <param.logo />
+      <param.install.notes />
       <param.target.install.notes />
       <param.intermediate />
       <param.files.only />
@@ -52,7 +56,6 @@
       <param.logdir />
       <param.enable.clean.build />
       <param.user.defined.mcr.options />
-      <param.embed.ctf />
       <param.target.type />
       <param.support.packages />
       <param.web.mcr />
@@ -64,6 +67,10 @@
       <param.windows.command.prompt />
       <param.create.log />
       <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+      <param.help.text />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}\createConfigGui.m</file>
@@ -77,13 +84,13 @@
     <fileset.package />
     <fileset.depfun />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\CreateConfigWin64\for_testing" name="readme.txt" optional="true">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\CreateConfigWin64\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\CreateConfigWin64\for_testing" name="CreateConfigWin64.exe" optional="false">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\CreateConfigWin64\for_testing\CreateConfigWin64.exe</file>
-      <file location="${PROJECT_ROOT}\CreateConfigWin64\for_testing" name="splash.png" optional="false">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\CreateConfigWin64\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\CreateConfigWin64\for_testing" name="readme.txt" optional="true">C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\CreateConfigWin64\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\CreateConfigWin64\for_testing" name="splash.png" optional="false">C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\CreateConfigWin64\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\CreateConfigWin64\for_testing" name="CreateConfigWin64.exe" optional="false">C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\CreateConfigWin64\for_testing\CreateConfigWin64.exe</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2016a</root>
+      <root>C:\Program Files\MATLAB\R2018a</root>
       <toolboxes />
     </matlab>
     <platform>

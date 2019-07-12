@@ -266,6 +266,9 @@ classdef BioCompEvaluationClass < DataEvaluationClass
           saveas(Fig,fullfile(B.Config.Directory,[B.Config.StackName(1:end-4) '_counts.pdf']),'pdf');
           close(Fig);
         end
+        if isfield(B.Results, 'SaveAllJunctionStacks') && B.Results.SaveAllJunctionStacks
+          B.saveAllJunctionImageStacks;
+        end
       else
         warning('MATLAB:AutoTipTrack:BiocompEvaluationClass:makeFigure','No field "RectPos" found in "Results". You likely need to restart the evaluation with the "EvaluateManually" parameter set to "true".');
       end
@@ -795,15 +798,16 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     end
     
     
-    function UI = createJunctionAnalysisUI(B, JunctionNumber, MoleculeList, varargin)
+    function [JunctionImagePos, JunctionImageSize] = getJunctionImagePos(B, JunctionNumber, varargin)
       p=inputParser;
-      p.addParameter('Padding', [15 15], @isnumeric); %Padding [left/right top/bottom] of junction in pixels
+      p.addParameter('JunctionImageSize', [], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Desired size of the junction image in pixels if empty, Padding is used instead
+      p.addParameter('Padding', [15 15], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Padding [left/right top/bottom] of junction in pixels
       p.addParameter('Rotate', true, @islogical);
       p.parse(varargin{:});
       % get the size and position of the junction
       ImageSize = [B.Config.Width B.Config.Height];
       if p.Results.Rotate
-        [JunctionPos, JunctionSize, ~] = InteractiveGUI.rotateRegions(B.Results.RectPos(JunctionNumber,:), B.Rotation, B.Results.RectSize, ImageSize);
+        [JunctionPos, JunctionSize, ImageSize] = InteractiveGUI.rotateRegions(B.Results.RectPos(JunctionNumber,:), B.Rotation, B.Results.RectSize, ImageSize);
         if B.Flip
           JunctionPos(:,2) = ImageSize(2) - JunctionPos(:,2) - JunctionSize(2);
         end
@@ -811,12 +815,30 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         JunctionPos = B.Results.RectPos(JunctionNumber,:);
         JunctionSize = B.Results.RectSize;
       end
-      JunctionImagePos = JunctionPos - p.Results.Padding;
+      if isempty(p.Results.JunctionImageSize)
+        Padding = p.Results.Padding;
+        JunctionImageSize = JunctionSize + (Padding * 2);
+      else
+        Padding = round((p.Results.JunctionImageSize - JunctionSize) ./ 2);
+        JunctionImageSize = p.Results.JunctionImageSize;
+      end
+      JunctionImagePos = JunctionPos - Padding;
       JunctionImagePos(JunctionImagePos < 1) = 1;
-      JunctionImageSize = JunctionSize + (p.Results.Padding * 2);
       JunctionImageSize(JunctionImageSize >= ImageSize) = ImageSize(JunctionImageSize > ImageSize) - 1;
       MaxJPos = ImageSize - JunctionImageSize;
       JunctionImagePos(JunctionImagePos > MaxJPos) = MaxJPos(JunctionImagePos > MaxJPos);
+    end
+    
+    
+    function UI = createJunctionAnalysisUI(B, JunctionNumber, MoleculeList, varargin)
+      p=inputParser;
+      p.addParameter('Rotate', true, @islogical);
+      p.KeepUnmatched=true;
+      p.parse(varargin{:});
+      Tmp = [fieldnames(p.Unmatched),struct2cell(p.Unmatched)];
+      Passthrough = [{'Rotate', p.Results.Rotate} reshape(Tmp', [], 1)'];
+      % get the size and position of the junction
+      [JunctionImagePos,JunctionImageSize] = B.getJunctionImagePos(JunctionNumber, Passthrough{:});
       B.flattenStack;
       %create and place the UI
       UI=figure('DockControls','off','IntegerHandle','off','MenuBar','none','Name',...
@@ -928,15 +950,9 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     function saveJunctionImageStack(B, hObj, ~)
       UI = hObj.Parent;
       MoleculeNo = UI.UserData.MoleculeList(UI.UserData.CurrentMolecule);
-      NFrames = size(UI.UserData.Stack,3);
-      FileName = fullfile(B.Config.Directory,...
-        [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif',B.Molecule(MoleculeNo).Name,UI.UserData.JunctionNumber)]);
-      imwrite(uint16(UI.UserData.Stack(:,:,1)), FileName, 'tif', 'Compression', 'none');
-      if NFrames > 1
-        for n = 2:NFrames
-          imwrite(uint16(UI.UserData.Stack(:,:,n)), FileName, 'tif', 'Compression', 'none', 'WriteMode', 'append');
-        end
-      end
+      FileName = fullfile(B.Config.Directory, ...
+        [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif', B.Molecule(MoleculeNo).Name, UI.UserData.JunctionNumber)]);
+      BioCompEvaluationClass.saveImageStack(UI.UserData.Stack, FileName);
     end
     
     
@@ -974,46 +990,51 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       end
       UI = B.addMoleculeData(UI);
     end
-
     
-    function UI = addMoleculeData(B, UI)
-      MoleculeNo = UI.UserData.MoleculeList(UI.UserData.CurrentMolecule);
-      UI.UserData.Frames = B.Molecule(MoleculeNo).Results(:,1);
-      NFrames = size(UI.UserData.Frames, 1);
-      if UI.UserData.Rotate
-        UI.UserData.Path = InteractiveGUI.rotateCoordinates(B.Molecule(MoleculeNo).Results(:,3:4), B.Rotation, [B.Config.Width B.Config.Height] .* B.Config.PixSize);
+    
+    function [JStack, Frames, Path] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, Rotate, MoleculeNo)
+      Frames = B.Molecule(MoleculeNo).Results(:,1);
+      NFrames = size(Frames, 1);
+      if Rotate
+        Path = InteractiveGUI.rotateCoordinates(B.Molecule(MoleculeNo).Results(:,3:4), B.Rotation, [B.Config.Width B.Config.Height] .* B.Config.PixSize);
         if B.Flip
-          UI.UserData.Path(:,2) = (B.Config.Height * B.Config.PixSize) - UI.UserData.Path(:,2);
+          Path(:,2) = (B.Config.Height * B.Config.PixSize) - Path(:,2);
         end
       else
-        UI.UserData.Path = B.Molecule(MoleculeNo).Results(:,3:4);
+        Path = B.Molecule(MoleculeNo).Results(:,3:4);
       end
-      UI.UserData.Path = UI.UserData.Path / B.Config.PixSize;
-      Shift = UI.UserData.JunctionImagePos - 1;
-      UI.UserData.Path = UI.UserData.Path - Shift(ones(NFrames,1),:);
-      Delete = UI.UserData.Path(:,1) < 0 | UI.UserData.Path(:,1) > UI.UserData.JunctionImageSize(1) |...
-        UI.UserData.Path(:,2) < 0 | UI.UserData.Path(:,2) > UI.UserData.JunctionImageSize(2);
+      Path = Path / B.Config.PixSize;
+      Shift = JunctionImagePos - 1;
+      Path = Path - Shift(ones(NFrames,1),:);
+      Delete = Path(:,1) < 0 | Path(:,1) > JunctionImageSize(1) |...
+        Path(:,2) < 0 | Path(:,2) > JunctionImageSize(2);
       if sum(Delete) < NFrames
-        UI.UserData.Frames(Delete) = [];
-        UI.UserData.Path(Delete,:) = [];
-        NFrames = size(UI.UserData.Frames, 1);
+        Frames(Delete) = [];
+        Path(Delete,:) = [];
       else
         warning('MATLAB:AutoTipTrack:BioCompEvaluationClass:addMoleculeData',...
           'Something is wrong with molecule number %d (name: %s).\nIt appears that the path is entirely outside the junction but it is reported as an error.\nIt is recommended to check it with fiesta and delete or fix it manually.', MoleculeNo, B.Molecule(MoleculeNo).Name);
       end
-      UI = B.setupSlider(UI, NFrames);
-      if UI.UserData.Rotate
-        UI.UserData.Stack = rot90(B.FlatStack(:, :, UI.UserData.Frames), round(B.Rotation / 90));
+      if Rotate
+        JStack = rot90(B.FlatStack(:, :, Frames), round(B.Rotation / 90));
         if B.Flip
-          UI.UserData.Stack = flipud(UI.UserData.Stack);
+          JStack = flipud(JStack);
         end
-        UI.UserData.Stack = UI.UserData.Stack(UI.UserData.JunctionImagePos(2):UI.UserData.JunctionImagePos(2) + UI.UserData.JunctionImageSize(2), ...
-          UI.UserData.JunctionImagePos(1):UI.UserData.JunctionImagePos(1) + UI.UserData.JunctionImageSize(1), :);
+        JStack = JStack(JunctionImagePos(2):JunctionImagePos(2) + JunctionImageSize(2) - 1, ...
+          JunctionImagePos(1):JunctionImagePos(1) + JunctionImageSize(1) - 1, :);
       else
-        UI.UserData.Stack = B.FlatStack(UI.UserData.JunctionImagePos(2):UI.UserData.JunctionImagePos(2) + UI.UserData.JunctionImageSize(2), ...
-          UI.UserData.JunctionImagePos(1):UI.UserData.JunctionImagePos(1) + UI.UserData.JunctionImageSize(1),...
-          UI.UserData.Frames);
+        JStack = B.FlatStack(JunctionImagePos(2):JunctionImagePos(2) + JunctionImageSize(2) - 1, ...
+          JunctionImagePos(1):JunctionImagePos(1) + JunctionImageSize(1) - 1,...
+          Frames);
       end
+    end
+
+    
+    function UI = addMoleculeData(B, UI)
+      MoleculeNo = UI.UserData.MoleculeList(UI.UserData.CurrentMolecule);
+      [UI.UserData.Stack, UI.UserData.Frames, UI.UserData.Path] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, Rotate, MoleculeNo);
+      NFrames = size(UI.UserData.Frames, 1);
+      UI = B.setupSlider(UI, NFrames);
       B.updateJunctionImage(UI.UserData.FrameSlider);
     end
     
@@ -1071,6 +1092,30 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     function B = deleteFrames(B,MolID,Frames)
       for n = 1: length(Frames)
         B.Molecule(MolID).Results(B.Molecule(MolID).Results(:,1) == Frames(n), :) = [];
+      end
+    end
+    
+    
+    function saveAllJunctionImageStacks(B)
+      p=inputParser;
+      p.addParameter('JunctionImageSize', [128 128], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Desired size of the junction image in pixels if empty, Padding is used instead
+      p.addParameter('Padding', [15 15], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Padding [left/right top/bottom] of junction in pixels
+      p.addParameter('Rotate', false, @islogical);
+      p.parse(B.Results.SaveJunctionParams{:});
+      Passthrough = {'JunctionImageSize', p.Results.JunctionImageSize, 'Padding', p.Results.Padding, 'Rotate', p.Results.Rotate};
+      B.flattenStack;
+      if isfield(B.Results, 'PassErrorMolecules')
+        ErrorPassJunctions = find(cellfun(@(X) ~isempty(X), B.Results.PassErrorMolecules));
+        for JunctionNo = ErrorPassJunctions
+          [JunctionImagePos, JunctionImageSize] = getJunctionImagePos(B, JunctionNo, Passthrough{:});
+          MoleculeList = B.Results.PassErrorMolecules{JunctionNo};
+          for MoleculeNo = MoleculeList'
+            [JStack] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, p.Results.Rotate, MoleculeNo);
+            FileName = fullfile(B.Config.Directory, ...
+              [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif', B.Molecule(MoleculeNo).Name, JunctionNo)]);
+            BioCompEvaluationClass.saveImageStack(JStack, FileName);
+          end
+        end
       end
     end
     
@@ -1192,6 +1237,17 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       else
         UI.UserData.FrameSlider.Enable = 'off';
         UI.UserData.FrameSlider.Value = 1;
+      end
+    end
+    
+    
+    function saveImageStack(Stack, FileName)
+      imwrite(uint16(Stack(:,:,1)), FileName, 'tif', 'Compression', 'none');
+      NFrames = size(Stack,3);
+      if NFrames > 1
+        for n = 2:NFrames
+          imwrite(uint16(Stack(:,:,n)), FileName, 'tif', 'Compression', 'none', 'WriteMode', 'append');
+        end
       end
     end
     

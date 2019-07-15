@@ -150,7 +150,7 @@ classdef AutoTipTrackDataClass < handle
     end
 
 
-    function [found, A]=reloadResults(A,target)
+    function [found, A]=reloadResults(A, Target, SubTarget)
       % Reload results from saved files
       %
       % Reloads results from files. Files are searched in the directory
@@ -177,7 +177,10 @@ classdef AutoTipTrackDataClass < handle
       %
       
       if nargin <2
-        target='Molecule';
+        Target='Molecule';
+      end
+      if nargin <3
+        SubTarget='';
       end
       if ~isa(A.Config,'ConfigClass')
         error('MATLAB:AutoTipTrack:AutoTipTrackDataClass','No valid configuration found. Config was: %s',A.Config);
@@ -215,7 +218,10 @@ classdef AutoTipTrackDataClass < handle
               results.Results.Speed=results.speed;
             end
           end
-          if isfield(results,target) && ~isempty(results.(target))
+          if isfield(results,Target) && ~isempty(results.(Target))
+            if ~isempty(SubTarget) && (~isfield(results.(Target), SubTarget) || isempty(results.(Target).(SubTarget)))
+              continue
+            end
             found=true;
             A.Config.reloadConfig(fullfile(A.Config.Directory, resultFiles(n).name));
             A.Objects=results.Objects;

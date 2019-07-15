@@ -627,7 +627,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         end
         B.Rect = [];
       end
-      for n = 1:size(RPos,1);
+      for n = 1:size(RPos,1)
         if p.Results.Labels
           annotation(Fig,'textbox',[LabelPos(n,:) LabelSize],...
             'String', sprintf('A1: %d\n A2: %d\n B1: %d\n B2: %d',...
@@ -1032,7 +1032,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     
     function UI = addMoleculeData(B, UI)
       MoleculeNo = UI.UserData.MoleculeList(UI.UserData.CurrentMolecule);
-      [UI.UserData.Stack, UI.UserData.Frames, UI.UserData.Path] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, Rotate, MoleculeNo);
+      [UI.UserData.Stack, UI.UserData.Frames, UI.UserData.Path] = getJunctionStack(B, UI.UserData.JunctionImagePos, UI.UserData.JunctionImageSize, UI.UserData.Rotate, MoleculeNo);
       NFrames = size(UI.UserData.Frames, 1);
       UI = B.setupSlider(UI, NFrames);
       B.updateJunctionImage(UI.UserData.FrameSlider);
@@ -1101,21 +1101,34 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       p.addParameter('JunctionImageSize', [128 128], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Desired size of the junction image in pixels if empty, Padding is used instead
       p.addParameter('Padding', [15 15], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Padding [left/right top/bottom] of junction in pixels
       p.addParameter('Rotate', false, @islogical);
+      p.addParameter('Flatten',false,@islogical);
+      p.addParameter('JunctionType', 'PassErrorMolecules', @ischar);
       p.parse(B.Results.SaveJunctionParams{:});
       Passthrough = {'JunctionImageSize', p.Results.JunctionImageSize, 'Padding', p.Results.Padding, 'Rotate', p.Results.Rotate};
-      B.flattenStack;
-      if isfield(B.Results, 'PassErrorMolecules')
-        ErrorPassJunctions = find(cellfun(@(X) ~isempty(X), B.Results.PassErrorMolecules));
-        for JunctionNo = ErrorPassJunctions
-          [JunctionImagePos, JunctionImageSize] = getJunctionImagePos(B, JunctionNo, Passthrough{:});
-          MoleculeList = B.Results.PassErrorMolecules{JunctionNo};
-          for MoleculeNo = MoleculeList'
-            [JStack] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, p.Results.Rotate, MoleculeNo);
-            FileName = fullfile(B.Config.Directory, ...
-              [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif', B.Molecule(MoleculeNo).Name, JunctionNo)]);
-            BioCompEvaluationClass.saveImageStack(JStack, FileName);
+      B.flattenStack(p.Results.Flatten);
+      Junctions = [];
+      if any(strcmpi(p.Results.JunctionType, 'PassErrorMolecules')) && isfield(B.Results, 'PassErrorMolecules')
+          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.PassErrorMolecules));
+      elseif any(strcmpi(p.Results.JunctionType, 'Split')) && isfield(B.Results, 'Found') && isfield(B.Results, 'Split')
+          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found) & B.Results.Split);
+      elseif any(strcmpi(p.Results.JunctionType, 'Pass')) && isfield(B.Results, 'Found') && isfield(B.Results, 'Pass')
+          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found) & B.Results.Pass);
+      elseif isfield(B.Results, 'Found')
+          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found));
+      end
+      for JunctionNo = Junctions
+          [JunctionImagePos, JunctionImageSize] = B.getJunctionImagePos(JunctionNo, Passthrough{:});
+          if strcmpi(p.Results.JunctionType, 'PassErrorMolecules')
+              MoleculeList = B.Results.PassErrorMolecules{JunctionNo};
+          else
+              MoleculeList = unique(B.Results.Found{JunctionNo}(:,2));
           end
-        end
+          for MoleculeNo = MoleculeList'
+              [JStack] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, p.Results.Rotate, MoleculeNo);
+              FileName = fullfile(B.Config.Directory, ...
+                  [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif', B.Molecule(MoleculeNo).Name, JunctionNo)]);
+              BioCompEvaluationClass.saveImageStack(JStack, FileName);
+          end
       end
     end
     

@@ -47,6 +47,7 @@ if ~isdeployed
   rmpath('assets')
 end
 allMsg=[queue.Message];
+queue.finish;
 queue.delete;
 %make sure the timer is stopped
 try

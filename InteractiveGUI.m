@@ -335,7 +335,7 @@ classdef InteractiveGUI < AutoTipTrackDataClass
         error('MATLAB:AutoTiptrack:InteractiveGUI:RotateMaxProj','Angle must be a multiple of 90 degrees')
       end
       Angle = mod(Angle,360);
-      if isstruct(I.Interface.PatternTab) && isfield(I.Interface.PatternTab, 'Rotation') && isfield(I.Interface.PatternTab, 'MaxP') && ~isempty(I.Interface.PatternTab.MaxP);
+      if isstruct(I.Interface.PatternTab) && isfield(I.Interface.PatternTab, 'Rotation') && isfield(I.Interface.PatternTab, 'MaxP') && ~isempty(I.Interface.PatternTab.MaxP)
         I.Interface.PatternTab.MaxP = rot90(I.Interface.PatternTab.MaxP, Angle / 90);
         I.Interface.PatternTab.Rotation = I.Interface.PatternTab.Rotation + Angle;
         I.Interface.PatternTab.Rotation = mod(I.Interface.PatternTab.Rotation,360);
@@ -380,7 +380,7 @@ classdef InteractiveGUI < AutoTipTrackDataClass
     
     
     function I=flipMaxProj(I,varargin)
-      if isstruct(I.Interface.PatternTab) && isfield(I.Interface.PatternTab, 'Flip') && isfield(I.Interface.PatternTab, 'MaxP') && ~isempty(I.Interface.PatternTab.MaxP);
+      if isstruct(I.Interface.PatternTab) && isfield(I.Interface.PatternTab, 'Flip') && isfield(I.Interface.PatternTab, 'MaxP') && ~isempty(I.Interface.PatternTab.MaxP)
         I.Interface.PatternTab.MaxP = flipud(I.Interface.PatternTab.MaxP);
         I.Interface.PatternTab.Flip = ~I.Interface.PatternTab.Flip;
         if isfield(I.Interface.PatternTab, 'SelectedRegion') && ...
@@ -1075,44 +1075,30 @@ classdef InteractiveGUI < AutoTipTrackDataClass
     
     
     function I = annotateTrainingData(I, ~, ~)
-      Fig = figure('Units', 'normalized');
-      Ax = axes(Fig);
-      Fig.Units = 'normalized';
-      Fig.Position = [0.05 0.05 0.9 0.9];
-      Ax.Position = [0 0 1 1];
       MaxFrame = round(I.Interface.ThresholdTab.FrameSlider.Max);
       CurrentFrame = round(I.Interface.ThresholdTab.FrameSlider.Value);
       Width = size(I.Interface.ThresholdTab.FlatImage,2);
       Height = size(I.Interface.ThresholdTab.FlatImage,1);
       AnnotationFile = fullfile(I.Config.Directory, [I.Config.StackName '_Annotation.tif']);
-      if ~ isfield(I.Interface.ThresholdTab, 'AnnotatedData')
-        I.Interface.ThresholdTab.AnnotatedData = false(Height, Width, MaxFrame);
-        if exist(AnnotationFile,'file') == 2
-          TiffMeta=imfinfo(AnnotationFile);
-          NumF=numel(TiffMeta);
-          if NumF > MaxFrame
-            NumF = MaxFrame;
-          end
-          for n = 1:NumF
-            I.Interface.ThresholdTab.AnnotatedData(:,:,n) = imread(AnnotationFile,'tif','Info',TiffMeta,'Index',n);
-          end
-          delete(AnnotationFile);
-          drawnow;
-          if CurrentFrame > 1
-            if CurrentFrame < NumF
-              MaxRestore = CurrentFrame - 1;
-            else
-              MaxRestore = NumF;
-            end
-            for n=1:MaxRestore
-              imwrite(I.Interface.ThresholdTab.AnnotatedData(:,:,n), AnnotationFile, 'writemode', 'append', 'Compression', 'none');
-            end
-          end
+      Fig = figure('Units', 'normalized', 'DeleteFcn', {@I.saveAnnotationData, AnnotationFile});
+      Ax = axes(Fig);
+      Fig.Units = 'normalized';
+      Fig.Position = [0.05 0.05 0.9 0.9];
+      Ax.Position = [0 0 1 1];
+      I.Interface.ThresholdTab.AnnotatedData = false(Height, Width, MaxFrame);
+      if exist(AnnotationFile,'file') == 2
+        TiffMeta=imfinfo(AnnotationFile);
+        NumF=numel(TiffMeta);
+        if NumF > MaxFrame
+          NumF = MaxFrame;
         end
+        for n = 1:NumF
+          I.Interface.ThresholdTab.AnnotatedData(:,:,n) = imread(AnnotationFile,'tif','Info',TiffMeta,'Index',n);
+        end
+        drawnow;
       end
       while CurrentFrame <= MaxFrame
         I.Interface.ThresholdTab.AnnotatedData(:,:,CurrentFrame) = I.annotateThresholdImage(CurrentFrame,Ax,I.Interface.ThresholdTab.AnnotatedData(:,:,CurrentFrame));
-        imwrite(I.Interface.ThresholdTab.AnnotatedData(:,:,CurrentFrame), AnnotationFile, 'writemode', 'append', 'Compression', 'none');
         CurrentFrame = CurrentFrame +1;
         if CurrentFrame <= MaxFrame
           I.Interface.ThresholdTab.FrameSlider.Value = CurrentFrame;
@@ -1120,6 +1106,18 @@ classdef InteractiveGUI < AutoTipTrackDataClass
         I.updateFlattenedImage(I.Interface.ThresholdTab.FrameSlider);
       end
       close(Fig);
+    end
+    
+    
+    function saveAnnotationData(I, ~, ~, AnnotationFile)
+      if isfield(I.Interface.ThresholdTab, 'AnnotatedData')
+        if exist(AnnotationFile,'file') == 2
+          delete(AnnotationFile);
+        end
+        for n=1:size(I.Interface.ThresholdTab.AnnotatedData, 3)
+          imwrite(I.Interface.ThresholdTab.AnnotatedData(:,:,n), AnnotationFile, 'writemode', 'append', 'Compression', 'none');
+        end
+      end
     end
     
     
@@ -1152,10 +1150,15 @@ classdef InteractiveGUI < AutoTipTrackDataClass
             DisplayImage(NewRegion) = 4;
           elseif Button == 3
             DisplayImage(NewRegion) = 3;
-          else
+          elseif Button == 2
             Mask(Y, X) = 1;
             DisplayImage(Y, X) = 0;
-          end
+         end
+        elseif ~isempty(Button) && Button == 2
+          Mask(Y, X) = 1;
+          DisplayImage(Y, X) = 0;
+        elseif ~isempty(Button) && Button == 127
+          DisplayImage(DisplayImage == 4) = 0;
         end
       end
       Annotation = DisplayImage == 4;

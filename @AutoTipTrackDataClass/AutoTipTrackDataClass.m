@@ -105,7 +105,7 @@ classdef AutoTipTrackDataClass < handle
       Objects=A.Objects; %#ok<NASGU,PROP>
       Results=A.Results; %#ok<PROP,NASGU>
       try
-        save(A.SavePath,'-v6','Config','Molecule','Filament','Objects','Results');
+        save(A.SavePath,'-v7','Config','Molecule','Filament','Objects','Results');
       catch ME
         ME.getReport
       end

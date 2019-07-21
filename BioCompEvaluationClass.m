@@ -784,17 +784,40 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     function B = manuallyCheckErrors(B)
       if isfield(B.Results, 'PassErrorMolecules')
         ErrorPassJunctions = find(cellfun(@(X) ~isempty(X), B.Results.PassErrorMolecules));
-        for n = ErrorPassJunctions
-          UI = B.createJunctionAnalysisUI(n,B.Results.PassErrorMolecules{n});
-          uiwait(UI);
-        end
-        B.calculateDirections;
-        B.processJunctions;
-        B.analyzeJunctions;
+        B.manuallyCheckJunctions(ErrorPassJunctions); %#ok<FNDSB>
       else
         warning('MATLAB:AutoTipTrack:BioCompEvaluationClass:manuallyCheckErrors', ...
-          'manuallyCheckErrors cannot check errors. No field PassErrorMolecules found in "Results".');
+          'manuallyCheckErrors cannot check errors. No field "PassErrorMolecules" found in "Results".');
       end
+    end
+
+    
+    function B = manuallyCheckAll(B)
+      if isfield(B.Results, 'Found')
+        Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found));
+        B.manuallyCheckJunctions(Junctions, 'Field', 'Found'); %#ok<FNDSB>
+      else
+        warning('MATLAB:AutoTipTrack:BioCompEvaluationClass:manuallyCheckAll', ...
+          'manuallyCheckAll cannot check errors. No field "Found" found in "Results".');
+      end
+    end
+
+    
+    function B = manuallyCheckJunctions(B, Junctions, varargin)
+      p=inputParser;
+      p.addParameter('Field', 'PassErrorMolecules', @ischar);
+      p.KeepUnmatched=true;
+      p.parse(varargin{:});
+      Tmp = [fieldnames(p.Unmatched),struct2cell(p.Unmatched)];
+      Passthrough = reshape(Tmp', [], 1)';
+      for n = Junctions
+        MoleculeList = B.Results.(p.Results.Field){n}(:, 2);
+        UI = B.createJunctionAnalysisUI(n, MoleculeList, Passthrough{:});
+        uiwait(UI);
+      end
+      B.calculateDirections;
+      B.processJunctions;
+      B.analyzeJunctions;
     end
     
     
@@ -944,6 +967,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       UI.UserData = UserData;
       UI = B.setupSlider(UI, Frames);
       UI = B.switchMolecule(UI);
+      B.playMolecule(UI);
     end
     
     
@@ -960,6 +984,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       UI = hObj.Parent;
       UI.UserData.CurrentMolecule = UI.UserData.CurrentMolecule + 1;
       B.switchMolecule(UI);
+      B.playMolecule(UI);
     end
     
     
@@ -967,6 +992,19 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       UI = hObj.Parent;
       UI.UserData.CurrentMolecule = UI.UserData.CurrentMolecule - 1;
       B.switchMolecule(UI);
+      B.playMolecule(UI);
+    end
+    
+    function playMolecule(B, UI)
+      for n = 1:UI.UserData.FrameSlider.Max
+        UI.UserData.FrameSlider.Value = n;
+        B.updateJunctionImage(UI.UserData.FrameSlider);
+        drawnow;
+        pause(1/30);
+      end
+      UI.UserData.FrameSlider.Value = 1;
+      B.updateJunctionImage(UI.UserData.FrameSlider);
+      drawnow;
     end
     
     
@@ -1046,16 +1084,18 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       for n = JunctionsA
         WrongTurnsRight = B.Results.A1{n}(:,1) > 0;
         WrongTurnsLeft = B.Results.AB{n}(:,1) > 0;
-        B.Results.PassErrorMolecules{n} = [B.Results.A1{n}(WrongTurnsRight, 2);...
-          B.Results.AB{n}(WrongTurnsLeft, 2)];
+        B.Results.PassErrorMolecules{n} = [B.Results.PassErrorMolecules{n}; ...
+          B.Results.A1{n}(WrongTurnsRight, :);...
+          B.Results.AB{n}(WrongTurnsLeft, :)];
         MolIDs(B.Results.PassErrorMolecules{n}) = true;
       end
       for n = JunctionsB
         WrongTurnsRight = B.Results.BA{n}(:,1) > 0;
         WrongTurnsLeft = B.Results.B2{n}(:,1) > 0;
-        B.Results.PassErrorMolecules{n} = [B.Results.BA{n}(WrongTurnsRight, 2);...
-          B.Results.B2{n}(WrongTurnsLeft, 2)];
-        MolIDs(B.Results.PassErrorMolecules{n}) = true;
+        B.Results.PassErrorMolecules{n} = [B.Results.PassErrorMolecules{n}; ...
+          B.Results.BA{n}(WrongTurnsRight, :);...
+          B.Results.B2{n}(WrongTurnsLeft, :)];
+        MolIDs(B.Results.PassErrorMolecules{n}(:, 2)) = true;
       end
       B.Results.PassErrorMoleculeNames = {B.Molecule(MolIDs).Name};
       B.Results.PassErrorMoleculeIDs = MolIDs;
@@ -1105,31 +1145,66 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       p.addParameter('JunctionType', 'PassErrorMolecules', @ischar);
       p.parse(B.Results.SaveJunctionParams{:});
       Passthrough = {'JunctionImageSize', p.Results.JunctionImageSize, 'Padding', p.Results.Padding, 'Rotate', p.Results.Rotate};
+      BallRadius = B.Config.SubtractBackground.BallRadius;
+      if ~p.Results.Flatten
+        B.Config.SubtractBackground.BallRadius = 0;
+      end
       B.flattenStack(p.Results.Flatten);
-      Junctions = [];
+      B.Config.SubtractBackground.BallRadius = BallRadius;
+      ResultsFields = p.Results.JunctionType;
       if any(strcmpi(p.Results.JunctionType, 'PassErrorMolecules')) && isfield(B.Results, 'PassErrorMolecules')
-          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.PassErrorMolecules));
+        Junctions = find(cellfun(@(X) ~isempty(X), B.Results.PassErrorMolecules));
+        B.saveManyJunctionImageStacks(Junctions, 'PassErrorMolecules', Passthrough{:}); %#ok<FNDSB>
+        ResultsFields(strcmpi(ResultsFields, 'PassErrorMolecules')) = [];
       elseif any(strcmpi(p.Results.JunctionType, 'Split')) && isfield(B.Results, 'Found') && isfield(B.Results, 'Split')
-          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found) & B.Results.Split);
+        Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found) & B.Results.Split);
+        B.saveManyJunctionImageStacks(Junctions, 'Found', 'Name', 'Split', Passthrough{:}); %#ok<FNDSB>
+        ResultsFields(strcmpi(ResultsFields, 'Split')) = [];
       elseif any(strcmpi(p.Results.JunctionType, 'Pass')) && isfield(B.Results, 'Found') && isfield(B.Results, 'Pass')
-          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found) & B.Results.Pass);
-      elseif isfield(B.Results, 'Found')
-          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found));
+        Junctions = find(cellfun(@(X) ~isempty(X), B.Results.Found) & B.Results.Pass);
+        B.saveManyJunctionImageStacks(Junctions, 'Found', 'Name', 'Pass', Passthrough{:}); %#ok<FNDSB>
+        ResultsFields(strcmpi(ResultsFields, 'Pass')) = [];
+      elseif any(strcmpi(p.Results.JunctionType, 'All'))
+        ResultsFields = {'A1', 'A2', 'B1', 'B2', 'AB', 'BA', 'Other'};
       end
+      for n = 1:length(ResultsFields)
+        if isfield(B.Results, ResultsFields{n}) && iscell(B.Results.(ResultsFields{n}))
+          Junctions = find(cellfun(@(X) ~isempty(X), B.Results.(ResultsFields{n})));
+          B.saveManyJunctionImageStacks(Junctions, ResultsFields{n}, Passthrough{:}); %#ok<FNDSB>
+        end
+      end
+    end
+    
+    
+    function saveManyJunctionImageStacks(B, Junctions, ResultsField, varargin)
+      p=inputParser;
+      p.addParameter('Name', ResultsField, @ischar);
+      p.addParameter('Rotate', false, @islogical);
+      p.KeepUnmatched=true;
+      p.parse(varargin{:});
+      Tmp = [fieldnames(p.Unmatched),struct2cell(p.Unmatched)];
+      Passthrough = [{'Rotate', p.Results.Rotate} reshape(Tmp', [], 1)'];
       for JunctionNo = Junctions
-          [JunctionImagePos, JunctionImageSize] = B.getJunctionImagePos(JunctionNo, Passthrough{:});
-          if strcmpi(p.Results.JunctionType, 'PassErrorMolecules')
-              MoleculeList = B.Results.PassErrorMolecules{JunctionNo};
-          else
-              MoleculeList = unique(B.Results.Found{JunctionNo}(:,2));
-          end
+        [JunctionImagePos, JunctionImageSize] = B.getJunctionImagePos(JunctionNo, Passthrough{:});
+        MoleculeList = B.getMoleculesAtJunction(JunctionNo, ResultsField);
+        if ~isempty(MoleculeList)
           for MoleculeNo = MoleculeList'
-              [JStack] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, p.Results.Rotate, MoleculeNo);
-              FileName = fullfile(B.Config.Directory, ...
-                  [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif', B.Molecule(MoleculeNo).Name, JunctionNo)]);
-              BioCompEvaluationClass.saveImageStack(JStack, FileName);
+            [JStack] = B.getJunctionStack(JunctionImagePos, JunctionImageSize, p.Results.Rotate, MoleculeNo);
+            FileName = fullfile(B.Config.Directory, ...
+              [B.Config.StackName(1:end-4) sprintf('_%s_%s_junction-%d.tif', p.Results.Name, B.Molecule(MoleculeNo).Name, JunctionNo)]);
+            BioCompEvaluationClass.saveImageStack(JStack, FileName);
           end
+        end
       end
+    end
+    
+    
+    function MoleculeList = getMoleculesAtJunction(B, JunctionNo, ResultsField)
+      if nargin < 3
+        ResultsField = 'Found';
+      end
+      MoleculeList = unique(B.Results.(ResultsField){JunctionNo}(:,2));
+      MoleculeList(isnan(MoleculeList)) = [];
     end
     
     %% region counting

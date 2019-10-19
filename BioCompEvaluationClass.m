@@ -1063,6 +1063,8 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       end
       Path = [Path Frames];
       Frames = (min(Frames) - TempPadding : max(Frames) + TempPadding)';
+      Frames(Frames < 1) = [];
+      Frames(Frames > size(B.FlatStack, 3)) = [];
       if Rotate
         JStack = rot90(B.FlatStack(:, :, Frames), round(B.Rotation / 90));
         if B.Flip

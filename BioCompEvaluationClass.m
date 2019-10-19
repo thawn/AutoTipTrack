@@ -266,7 +266,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
           saveas(Fig,fullfile(B.Config.Directory,[B.Config.StackName(1:end-4) '_counts.pdf']),'pdf');
           close(Fig);
         end
-        if isfield(B.Results, 'SaveAllJunctionStacks') && B.Results.SaveAllJunctionStacks
+        if isfield(B.Results, 'SaveJunctionParams')
           B.saveAllJunctionImageStacks;
         end
       else
@@ -378,13 +378,13 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         if B.Results.NEvents(n) > 0
           MolN = unique(C);
           Counter = 1;
-          B.Results.A2{n} = NaN(length(MolN),2);
-          B.Results.A1{n} = NaN(length(MolN),2);
-          B.Results.B2{n} = NaN(length(MolN),2);
-          B.Results.B1{n} = NaN(length(MolN),2);
-          B.Results.AB{n} = NaN(length(MolN),2);
-          B.Results.BA{n} = NaN(length(MolN),2);
-          B.Results.Other{n} = NaN(length(MolN),2);
+          B.Results.A2{n} = NaN(length(MolN),4);
+          B.Results.A1{n} = NaN(length(MolN),4);
+          B.Results.B2{n} = NaN(length(MolN),4);
+          B.Results.B1{n} = NaN(length(MolN),4);
+          B.Results.AB{n} = NaN(length(MolN),4);
+          B.Results.BA{n} = NaN(length(MolN),4);
+          B.Results.Other{n} = NaN(length(MolN),4);
           B.Results.Entrances{n} = NaN(length(MolN),3);
           B.Results.Exits{n} = NaN(length(MolN),3);
           for k = MolN'
@@ -405,17 +405,17 @@ classdef BioCompEvaluationClass < DataEvaluationClass
                   plot(DebugAx,B.Results.AllX(Rows,k)/B.Config.PixSize,B.Results.AllY(Rows,k)/B.Config.PixSize);
                   plot(DebugAx,B.Results.AllX(Rows(end)+1,k)/B.Config.PixSize,B.Results.AllY(Rows(end)+1,k)/B.Config.PixSize,'*g');
                 end
-                B.Results.A2{n}(Counter,:) = [all(Path(:) == PA2(:)), k];
-                B.Results.A1{n}(Counter,:) = [all(Path(:) == PA1(:)), k];
-                B.Results.B2{n}(Counter,:) = [all(Path(:) == PB2(:)), k];
-                B.Results.B1{n}(Counter,:) = [all(Path(:) == PB1(:)), k];
-                B.Results.AB{n}(Counter,:) = [all(Path(:) == PAB(:)), k];
-                B.Results.BA{n}(Counter,:) = [all(Path(:) == PBA(:)), k];
+                B.Results.A2{n}(Counter,:) = [all(Path(:) == PA2(:)), k, Rows(1), Rows(end)];
+                B.Results.A1{n}(Counter,:) = [all(Path(:) == PA1(:)), k, Rows(1), Rows(end)];
+                B.Results.B2{n}(Counter,:) = [all(Path(:) == PB2(:)), k, Rows(1), Rows(end)];
+                B.Results.B1{n}(Counter,:) = [all(Path(:) == PB1(:)), k, Rows(1), Rows(end)];
+                B.Results.AB{n}(Counter,:) = [all(Path(:) == PAB(:)), k, Rows(1), Rows(end)];
+                B.Results.BA{n}(Counter,:) = [all(Path(:) == PBA(:)), k, Rows(1), Rows(end)];
                 B.Results.Other{n}(Counter,:) = [...
                   ~B.Results.A2{n}(Counter,1) && ~B.Results.A1{n}(Counter,1)...
                   && ~B.Results.B2{n}(Counter,1) && ~B.Results.B1{n}(Counter,1)...
                   && ~B.Results.AB{n}(Counter,1) && ~B.Results.BA{n}(Counter,1),...
-                  k];
+                  k, Rows(1), Rows(end)];
                 B.Results.Entrances{n}(Counter,:) = [all(Path(1,:) == PA1(1,:)) || all(Path(1,:) == PB1(1,:)), B.Results.AllT(Rows(1), k), k];
                 B.Results.Exits{n}(Counter,:) = [all(Path(2,:) == PA1(2,:)) || all(Path(2,:) == PA2(2,:)), B.Results.AllT(Rows(end), k), k];
               end
@@ -654,7 +654,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
             'Position',[RPos(n,:) RSize],'EdgeColor','r');
         end
       end
-   end
+    end
     
     
     function [PA2, PA1, PB2, PB1, PAB, PBA] = rotatePaths(B)
@@ -790,7 +790,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
           'manuallyCheckErrors cannot check errors. No field "PassErrorMolecules" found in "Results".');
       end
     end
-
+    
     
     function B = manuallyCheckAll(B)
       if isfield(B.Results, 'Found')
@@ -801,7 +801,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
           'manuallyCheckAll cannot check errors. No field "Found" found in "Results".');
       end
     end
-
+    
     
     function B = manuallyCheckJunctions(B, Junctions, varargin)
       p=inputParser;
@@ -815,6 +815,11 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         UI = B.createJunctionAnalysisUI(n, MoleculeList, Passthrough{:});
         uiwait(UI);
       end
+      B.thoroughReEvaluate;
+    end
+    
+    
+    function B = thoroughReEvaluate(B)
       B.calculateDirections;
       B.processJunctions;
       B.analyzeJunctions;
@@ -856,6 +861,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     function UI = createJunctionAnalysisUI(B, JunctionNumber, MoleculeList, varargin)
       p=inputParser;
       p.addParameter('Rotate', true, @islogical);
+      p.addParameter('UIName', 'PassErrorMolecules', @ischar);
       p.KeepUnmatched=true;
       p.parse(varargin{:});
       Tmp = [fieldnames(p.Unmatched),struct2cell(p.Unmatched)];
@@ -865,7 +871,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       B.flattenStack;
       %create and place the UI
       UI=figure('DockControls','off','IntegerHandle','off','MenuBar','none','Name',...
-        'Analyse Junctions','NumberTitle','off','Tag','JunctionAnalysisUI');
+        ['Analyze: ', p.Results.UIName],'NumberTitle','off','Tag','JunctionAnalysisUI');
       Units=get(0,'Units');
       set(0,'Units','pixels');
       ScreenSize=get(0,'screensize');
@@ -954,7 +960,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         'Position',[ButtonXPos 0.14 NormalizedButtonWidth 0.1],...
         'Callback',@B.analyzeNextMolecule,...
         'Tag','NextButton',...
-        'Enable', 'off');
+        'Enable', 'on');
       UserData.DoneButton = uicontrol(...
         'Parent',UI,...
         'Units','normalized',...
@@ -963,7 +969,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         'Position',[ButtonXPos 0.02 NormalizedButtonWidth 0.1],...
         'Callback',@B.closeJunctionAnalysisUI,...
         'Tag','DoneButton',...
-        'Enable', 'off');
+        'Enable', 'on');
       UI.UserData = UserData;
       UI = B.setupSlider(UI, Frames);
       UI = B.switchMolecule(UI);
@@ -1015,11 +1021,10 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       if UI.UserData.CurrentMolecule < 1
         UI.UserData.CurrentMolecule = 1;
       end
-      if UI.UserData.CurrentMolecule == length(UI.UserData.MoleculeList)
-        UI.UserData.NextButton.Enable = 'off';
-        UI.UserData.DoneButton.Enable = 'on';
-      elseif length(UI.UserData.MoleculeList) > 1
-        UI.UserData.NextButton.Enable = 'on';
+      if UI.UserData.CurrentMolecule < length(UI.UserData.MoleculeList)
+        UI.UserData.NextButton.Callback = @B.analyzeNextMolecule;
+      else
+        UI.UserData.NextButton.Callback = @B.closeJunctionAnalysisUI;
       end
       if UI.UserData.CurrentMolecule > 1
         UI.UserData.PrevButton.Enable = 'on';
@@ -1030,7 +1035,10 @@ classdef BioCompEvaluationClass < DataEvaluationClass
     end
     
     
-    function [JStack, Frames, Path] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, Rotate, MoleculeNo)
+    function [JStack, Frames, Path] = getJunctionStack(B, JunctionImagePos, JunctionImageSize, Rotate, MoleculeNo, TempPadding)
+      if nargin < 6
+        TempPadding = 0;
+      end
       Frames = B.Molecule(MoleculeNo).Results(:,1);
       NFrames = size(Frames, 1);
       if Rotate
@@ -1053,6 +1061,8 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         warning('MATLAB:AutoTipTrack:BioCompEvaluationClass:addMoleculeData',...
           'Something is wrong with molecule number %d (name: %s).\nIt appears that the path is entirely outside the junction but it is reported as an error.\nIt is recommended to check it with fiesta and delete or fix it manually.', MoleculeNo, B.Molecule(MoleculeNo).Name);
       end
+      Path = [Path Frames];
+      Frames = (min(Frames) - TempPadding : max(Frames) + TempPadding)';
       if Rotate
         JStack = rot90(B.FlatStack(:, :, Frames), round(B.Rotation / 90));
         if B.Flip
@@ -1066,7 +1076,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
           Frames);
       end
     end
-
+    
     
     function UI = addMoleculeData(B, UI)
       MoleculeNo = UI.UserData.MoleculeList(UI.UserData.CurrentMolecule);
@@ -1142,9 +1152,10 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       p.addParameter('Padding', [15 15], @(x) isnumeric(x) && (isempty(x) || size(x, 2) == 2)); %Padding [left/right top/bottom] of junction in pixels
       p.addParameter('Rotate', false, @islogical);
       p.addParameter('Flatten',false,@islogical);
-      p.addParameter('JunctionType', 'PassErrorMolecules', @ischar);
+      p.addParameter('JunctionType', {'PassErrorMolecules'}, @iscellstr);
+      p.addParameter('TempPadding', 0, @isnumeric);
       p.parse(B.Results.SaveJunctionParams{:});
-      Passthrough = {'JunctionImageSize', p.Results.JunctionImageSize, 'Padding', p.Results.Padding, 'Rotate', p.Results.Rotate};
+      Passthrough = {'JunctionImageSize', p.Results.JunctionImageSize, 'Padding', p.Results.Padding, 'Rotate', p.Results.Rotate, 'TempPadding', p.Results.TempPadding};
       BallRadius = B.Config.SubtractBackground.BallRadius;
       if ~p.Results.Flatten
         B.Config.SubtractBackground.BallRadius = 0;
@@ -1173,6 +1184,9 @@ classdef BioCompEvaluationClass < DataEvaluationClass
           B.saveManyJunctionImageStacks(Junctions, ResultsFields{n}, Passthrough{:}); %#ok<FNDSB>
         end
       end
+      if B.Manual
+        B.thoroughReEvaluate;
+      end
     end
     
     
@@ -1180,6 +1194,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       p=inputParser;
       p.addParameter('Name', ResultsField, @ischar);
       p.addParameter('Rotate', false, @islogical);
+      p.addParameter('TempPadding', 0, @isnumeric);
       p.KeepUnmatched=true;
       p.parse(varargin{:});
       Tmp = [fieldnames(p.Unmatched),struct2cell(p.Unmatched)];
@@ -1188,11 +1203,16 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         [JunctionImagePos, JunctionImageSize] = B.getJunctionImagePos(JunctionNo, Passthrough{:});
         MoleculeList = B.getMoleculesAtJunction(JunctionNo, ResultsField);
         if ~isempty(MoleculeList)
-          for MoleculeNo = MoleculeList'
-            [JStack] = B.getJunctionStack(JunctionImagePos, JunctionImageSize, p.Results.Rotate, MoleculeNo);
-            FileName = fullfile(B.Config.Directory, ...
-              [B.Config.StackName(1:end-4) sprintf('_%s_%s_junction-%d.tif', p.Results.Name, B.Molecule(MoleculeNo).Name, JunctionNo)]);
-            BioCompEvaluationClass.saveImageStack(JStack, FileName);
+          if B.Manual
+            UI = B.createJunctionAnalysisUI(JunctionNo, MoleculeList', 'UIName', ResultsField, Passthrough{:});
+            uiwait(UI);
+          else
+            for MoleculeNo = MoleculeList'
+              [JStack, Frames] = B.getJunctionStack(round(JunctionImagePos), JunctionImageSize, p.Results.Rotate, MoleculeNo, p.Results.TempPadding);
+              FileName = fullfile(B.Config.Directory, ...
+                [B.Config.StackName(1:end-4) sprintf('_%s_%s_junction-%d_Frames_%d-%d.tif', p.Results.Name, B.Molecule(MoleculeNo).Name, JunctionNo, min(Frames), max(Frames))]);
+              BioCompEvaluationClass.saveImageStack(JStack, FileName);
+            end
           end
         end
       end
@@ -1203,7 +1223,8 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       if nargin < 3
         ResultsField = 'Found';
       end
-      MoleculeList = unique(B.Results.(ResultsField){JunctionNo}(:,2));
+      UseMolecules = B.Results.(ResultsField){JunctionNo}(:,1) > 0;
+      MoleculeList = unique(B.Results.(ResultsField){JunctionNo}(UseMolecules,2));
       MoleculeList(isnan(MoleculeList)) = [];
     end
     
@@ -1237,7 +1258,7 @@ classdef BioCompEvaluationClass < DataEvaluationClass
             B.Results.RegionCounts(1).Counts(k) = B.Results.RegionCounts(1).Counts(k) + 1;
           end
         end
-      end      
+      end
     end
     
     
@@ -1278,7 +1299,15 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       imshow(Stack, [black, white], 'Parent', UI.UserData.ImageAxes);
       hold(UI.UserData.ImageAxes, 'on');
       plot(UI.UserData.ImageAxes, UI.UserData.Path(:, 1), UI.UserData.Path(:, 2),'b');
-      plot(UI.UserData.ImageAxes, UI.UserData.Path(Frame,1), UI.UserData.Path(Frame,2),'bd','MarkerSize',8);
+      TrackFrame = UI.UserData.Path(:,3) == Frame + UI.UserData.Path(1,3) - 1;
+      if any(TrackFrame)
+        UI.UserData.DeleteButton.Enable = 'on';
+        UI.UserData.SplitButton.Enable = 'on';
+        plot(UI.UserData.ImageAxes, UI.UserData.Path(TrackFrame,1), UI.UserData.Path(TrackFrame,2),'bd','MarkerSize',8);
+      else
+        UI.UserData.DeleteButton.Enable = 'off';
+        UI.UserData.SplitButton.Enable = 'off';
+      end
     end
     
     

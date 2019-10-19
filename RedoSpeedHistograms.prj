@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="2795151382" file="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\RedoSpeedHistograms.prj" location="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack" name="RedoSpeedHistograms" preferred-package-location="C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\RedoSpeedHistograms\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="2323066720" file="C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\RedoSpeedHistograms.prj" location="C:\Users\DiezLab\Documents\GitHub\AutoTipTrack" name="RedoSpeedHistograms" preferred-package-location="C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\RedoSpeedHistograms\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>RedoSpeedHistograms</param.appname>
     <param.icon />
     <param.icons />
@@ -22,7 +22,6 @@
     <param.logdir>${PROJECT_ROOT}\RedoSpeedHistograms</param.logdir>
     <param.enable.clean.build>false</param.enable.clean.build>
     <param.user.defined.mcr.options />
-    <param.embed.ctf>true</param.embed.ctf>
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
     <param.web.mcr>true</param.web.mcr>
@@ -34,6 +33,10 @@
     <param.windows.command.prompt>true</param.windows.command.prompt>
     <param.create.log>false</param.create.log>
     <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text />
     <unset>
       <param.icon />
       <param.icons />
@@ -46,6 +49,7 @@
       <param.installpath.string />
       <param.installpath.combo />
       <param.logo />
+      <param.install.notes />
       <param.target.install.notes />
       <param.intermediate />
       <param.files.only />
@@ -53,7 +57,6 @@
       <param.logdir />
       <param.enable.clean.build />
       <param.user.defined.mcr.options />
-      <param.embed.ctf />
       <param.target.type />
       <param.support.packages />
       <param.web.mcr />
@@ -65,6 +68,10 @@
       <param.windows.command.prompt />
       <param.create.log />
       <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+      <param.help.text />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}\redoSpeedHistograms.m</file>
@@ -147,6 +154,7 @@
       <file>${PROJECT_ROOT}\fDefStructure.m</file>
       <file>${PROJECT_ROOT}\flattenImage.m</file>
       <file>${PROJECT_ROOT}\fPlaceFig.m</file>
+      <file>${PROJECT_ROOT}\ginput2.m</file>
       <file>${PROJECT_ROOT}\imageprocessing\@double_error\abs.m</file>
       <file>${PROJECT_ROOT}\imageprocessing\@double_error\atan.m</file>
       <file>${PROJECT_ROOT}\imageprocessing\@double_error\atan2.m</file>
@@ -259,6 +267,7 @@
       <file>${PROJECT_ROOT}\imageprocessing\Pic.m</file>
       <file>${PROJECT_ROOT}\imageprocessing\RoughScan.m</file>
       <file>${PROJECT_ROOT}\imageprocessing\ScanImage.m</file>
+      <file>${PROJECT_ROOT}\InteractiveGUI.m</file>
       <file>${PROJECT_ROOT}\Logger.m</file>
       <file>${PROJECT_ROOT}\MakeMovieEvaluationClass.m</file>
       <file>${PROJECT_ROOT}\mergeVars.m</file>
@@ -271,13 +280,13 @@
       <file>${PROJECT_ROOT}\xticklabel_rotate.m</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\RedoSpeedHistograms\for_testing" name="RedoSpeedHistograms.exe" optional="false">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\RedoSpeedHistograms\for_testing\RedoSpeedHistograms.exe</file>
-      <file location="${PROJECT_ROOT}\RedoSpeedHistograms\for_testing" name="readme.txt" optional="true">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\RedoSpeedHistograms\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\RedoSpeedHistograms\for_testing" name="splash.png" optional="false">C:\Users\diezlab\Documents\MATLAB\till\AutoTipTrack\RedoSpeedHistograms\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\RedoSpeedHistograms\for_testing" name="splash.png" optional="false">C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\RedoSpeedHistograms\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\RedoSpeedHistograms\for_testing" name="RedoSpeedHistograms.exe" optional="false">C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\RedoSpeedHistograms\for_testing\RedoSpeedHistograms.exe</file>
+      <file location="${PROJECT_ROOT}\RedoSpeedHistograms\for_testing" name="readme.txt" optional="true">C:\Users\DiezLab\Documents\GitHub\AutoTipTrack\RedoSpeedHistograms\for_testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2016a</root>
+      <root>C:\Program Files\MATLAB\R2018a</root>
       <toolboxes />
     </matlab>
     <platform>

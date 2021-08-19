@@ -79,7 +79,7 @@ else
 end
 % we need to explicitly use the data evaluation classes here for the
 % compiler to properly recognize that we might call them using feval later.
-%#function SpeedEvaluationClass SpeedEvaluation2Class BundlingEvaluationClass Speed2TempEvaluationClass SpeedJannesEvaluationClass MakeMovieEvaluationClass BioCompEvaluationClass DilutionSeriesEvaluationClass
+%#function SpeedEvaluationClass SpeedEvaluation2Class BundlingEvaluationClass Speed2TempEvaluationClass SpeedJannesEvaluationClass MakeMovieEvaluationClass BioCompEvaluationClass DilutionSeriesEvaluationClass AngleEvaluationClass
 
 %recursively scan the directory structure for stacks and add them to the
 %queue

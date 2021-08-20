@@ -15,7 +15,7 @@ end
 if A.Config.PreferStackPixSize && ~isempty(tempCalib.x) && tempCalib.x>0
   if strcmpi(tempCalib.unit,'nm')
     A.Config.PixSize=tempCalib.x;
-  elseif strcmpi(tempCalib.unit,'um')||strcmpi(tempCalib.unit,sprintf('%cm',181)||strcmpi(tempCalib.unit,'micron'))
+  elseif strcmpi(tempCalib.unit,'um')||strcmpi(tempCalib.unit,sprintf('%cm',181))||strcmpi(tempCalib.unit,'micron')
     A.Config.PixSize=tempCalib.x*1000;
   else
     warning('MATLAB:AutoTipTrack:QueueElementClass:readStack','Could not read pixel size from stack %s because I did not recognize the pixel unit: %s. Using pixel size from configuration: %gnm',A.FileName,tempCalib.unit,A.Config.PixSize);

@@ -88,7 +88,7 @@ classdef AutoTipTrackDataClass < handle
       if isempty(A.Config.AcquisitionDate)
         %fall back to file modification date
         FileInfo=dir(fullfile(A.FilePath,A.FileName));
-        A.Config.AcquisitionDate=datetime(FileInfo(1).date);
+        A.Config.AcquisitionDate=datetime(FileInfo(1).datenum, 'ConvertFrom','datenum');
       end
     end
     

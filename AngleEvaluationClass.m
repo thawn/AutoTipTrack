@@ -12,8 +12,8 @@ classdef AngleEvaluationClass < SpeedEvaluation2Class
         Angles=cell(length(S.Molecule),1);
         for n = 1:length(S.Molecule)
             %     Distances = Molecule(n).PathData(2:end,1:2) - Molecule(n).PathData(1:end-1,1:2);
-            Distances = S.Molecule(n).Results(2:end,3:4) - S.Molecule(n).Results(1:end-1,3:4);
-            Angles{n} = movmean(atan2(-Distances(:, 2), Distances(:,1)), Window);
+            Distances = movmean(S.Molecule(n).Results(2:end,3:4) - S.Molecule(n).Results(1:end-1,3:4), Window);
+            Angles{n} = atan2(-Distances(:, 2), Distances(:,1));
         end
         Angles=cell2mat(Angles);
     end

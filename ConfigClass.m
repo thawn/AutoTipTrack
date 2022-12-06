@@ -268,7 +268,9 @@ classdef ConfigClass < handle
         Config.Version=1.915;
       end
       if Config.Version<1.916
-        %Add a evaluation class for velocity to temperature evaluation
+        if ~isfield(Config.Evaluation, 'NeedsWholeStack')
+          Config.Evaluation.NeedsWholeStack={false,false,true};
+        end
         Config.Evaluation.EvalClassNames=[Config.Evaluation.EvalClassNames,...
           'Speed2TempEvaluationClass'];
         Config.Evaluation.TasksNeeded=[Config.Evaluation.TasksNeeded,...

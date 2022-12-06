@@ -1039,32 +1039,36 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       if nargin < 6
         TempPadding = 0;
       end
-      Frames = B.Molecule(MoleculeNo).Results(:,1);
-      NFrames = size(Frames, 1);
-      if Rotate
-        Path = InteractiveGUI.rotateCoordinates(B.Molecule(MoleculeNo).Results(:,3:4), B.Rotation, [B.Config.Width B.Config.Height] .* B.Config.PixSize);
-        if B.Flip
-          Path(:,2) = (B.Config.Height * B.Config.PixSize) - Path(:,2);
+      if ~isempty(MoleculeNo)
+        Frames = B.Molecule(MoleculeNo).Results(:,1);
+        NFrames = size(Frames, 1);
+        if Rotate
+          Path = InteractiveGUI.rotateCoordinates(B.Molecule(MoleculeNo).Results(:,3:4), B.Rotation, [B.Config.Width B.Config.Height] .* B.Config.PixSize);
+          if B.Flip
+            Path(:,2) = (B.Config.Height * B.Config.PixSize) - Path(:,2);
+          end
+        else
+          Path = B.Molecule(MoleculeNo).Results(:,3:4);
         end
+        Path = Path / B.Config.PixSize;
+        Shift = JunctionImagePos - 1;
+        Path = Path - Shift(ones(NFrames,1),:);
+        Delete = Path(:,1) < 0 | Path(:,1) > JunctionImageSize(1) |...
+          Path(:,2) < 0 | Path(:,2) > JunctionImageSize(2);
+        if sum(Delete) < NFrames
+          Frames(Delete) = [];
+          Path(Delete,:) = [];
+        else
+          warning('MATLAB:AutoTipTrack:BioCompEvaluationClass:addMoleculeData',...
+            'Something is wrong with molecule number %d (name: %s).\nIt appears that the path is entirely outside the junction but it is reported as an error.\nIt is recommended to check it with fiesta and delete or fix it manually.', MoleculeNo, B.Molecule(MoleculeNo).Name);
+        end
+        Path = [Path Frames];
+        Frames = (min(Frames) - TempPadding : max(Frames) + TempPadding)';
+        Frames(Frames < 1) = [];
+        Frames(Frames > size(B.FlatStack, 3)) = [];
       else
-        Path = B.Molecule(MoleculeNo).Results(:,3:4);
+        Frames = 1:size(B.FlatStack, 3);
       end
-      Path = Path / B.Config.PixSize;
-      Shift = JunctionImagePos - 1;
-      Path = Path - Shift(ones(NFrames,1),:);
-      Delete = Path(:,1) < 0 | Path(:,1) > JunctionImageSize(1) |...
-        Path(:,2) < 0 | Path(:,2) > JunctionImageSize(2);
-      if sum(Delete) < NFrames
-        Frames(Delete) = [];
-        Path(Delete,:) = [];
-      else
-        warning('MATLAB:AutoTipTrack:BioCompEvaluationClass:addMoleculeData',...
-          'Something is wrong with molecule number %d (name: %s).\nIt appears that the path is entirely outside the junction but it is reported as an error.\nIt is recommended to check it with fiesta and delete or fix it manually.', MoleculeNo, B.Molecule(MoleculeNo).Name);
-      end
-      Path = [Path Frames];
-      Frames = (min(Frames) - TempPadding : max(Frames) + TempPadding)';
-      Frames(Frames < 1) = [];
-      Frames(Frames > size(B.FlatStack, 3)) = [];
       if Rotate
         JStack = rot90(B.FlatStack(:, :, Frames), round(B.Rotation / 90));
         if B.Flip
@@ -1184,6 +1188,8 @@ classdef BioCompEvaluationClass < DataEvaluationClass
         if isfield(B.Results, ResultsFields{n}) && iscell(B.Results.(ResultsFields{n}))
           Junctions = find(cellfun(@(X) ~isempty(X), B.Results.(ResultsFields{n})));
           B.saveManyJunctionImageStacks(Junctions, ResultsFields{n}, Passthrough{:}); %#ok<FNDSB>
+        elseif strcmpi(ResultsFields{n}, 'EntireStack')
+          B.saveManyJunctionImageStacks(1:size(B.Results.RectPos, 1), ResultsFields{n}, Passthrough{:});
         end
       end
       if B.Manual
@@ -1203,19 +1209,30 @@ classdef BioCompEvaluationClass < DataEvaluationClass
       Passthrough = [{'Rotate', p.Results.Rotate} reshape(Tmp', [], 1)'];
       for JunctionNo = Junctions
         [JunctionImagePos, JunctionImageSize] = B.getJunctionImagePos(JunctionNo, Passthrough{:});
-        MoleculeList = B.getMoleculesAtJunction(JunctionNo, ResultsField);
-        if ~isempty(MoleculeList)
-          if B.Manual
-            UI = B.createJunctionAnalysisUI(JunctionNo, MoleculeList', 'UIName', ResultsField, Passthrough{:});
-            uiwait(UI);
-          else
-            for MoleculeNo = MoleculeList'
-              [JStack, Frames] = B.getJunctionStack(round(JunctionImagePos), JunctionImageSize, p.Results.Rotate, MoleculeNo, p.Results.TempPadding);
-              FileName = fullfile(B.Config.Directory, ...
-                [B.Config.StackName(1:end-4) sprintf('_%s_%s_junction-%d_Frames_%d-%d.tif', p.Results.Name, B.Molecule(MoleculeNo).Name, JunctionNo, min(Frames), max(Frames))]);
-              BioCompEvaluationClass.saveImageStack(JStack, FileName);
+        JStack = [];
+        if strcmpi(ResultsField, 'EntireStack')
+          [JStack] = B.getJunctionStack(round(JunctionImagePos), JunctionImageSize, p.Results.Rotate, [], p.Results.TempPadding);
+          FileName = fullfile(B.Config.Directory, ...
+            [B.Config.StackName(1:end-4) sprintf('_%s_junction-%d.tif', p.Results.Name, JunctionNo)]);
+          BioCompEvaluationClass.saveImageStack(JStack, FileName);
+        else
+          MoleculeList = B.getMoleculesAtJunction(JunctionNo, ResultsField);
+          if ~isempty(MoleculeList)
+            if B.Manual
+              UI = B.createJunctionAnalysisUI(JunctionNo, MoleculeList', 'UIName', ResultsField, Passthrough{:});
+              uiwait(UI);
+            else
+              for MoleculeNo = MoleculeList'
+                [JStack, Frames] = B.getJunctionStack(round(JunctionImagePos), JunctionImageSize, p.Results.Rotate, MoleculeNo, p.Results.TempPadding);
+                FileName = fullfile(B.Config.Directory, ...
+                  [B.Config.StackName(1:end-4) sprintf('_%s_%s_junction-%d_Frames_%d-%d.tif', p.Results.Name, B.Molecule(MoleculeNo).Name, JunctionNo, min(Frames), max(Frames))]);
+                BioCompEvaluationClass.saveImageStack(JStack, FileName);
+              end
             end
           end
+        end
+        if ~isempty(JStack)
+          BioCompEvaluationClass.saveImageStack(JStack, FileName);
         end
       end
     end

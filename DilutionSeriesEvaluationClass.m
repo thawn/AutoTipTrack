@@ -75,7 +75,11 @@ classdef DilutionSeriesEvaluationClass < SpeedEvaluation2Class
     
     function [Conc, FileNameParts] = analyzeFileNames(FileNames)
       FileNameParts = cellfun(@(X) strsplit(X, '_'),FileNames, 'Uniform', false);
-      Conc = cellfun(@(X) str2double(X{4}),FileNameParts);
+      Conc = cellfun(@(X) str2double(X{7}),FileNameParts); %change X{7} here to get the correct part of the file
+      if any(isnan(Conc))
+        warning('Warning some filenames could not be parsed properly, you may need to change the part of the file that is exatracted in the code')
+        Conc(isnan(Conc)) = 0;
+      end
     end
     
     

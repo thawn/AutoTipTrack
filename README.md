@@ -1,6 +1,13 @@
 # AutoTipTrack
 A software algorithm for the automated analysis of in vitro gliding motility assays.
 
+## Citation
+
+please cite
+
+(1) Korten, T.; Tavkin, E.; Scharrel, L.; Singh Kushwaha, V.; Diez, S. An Automated in Vitro Motility Assay for High-Throughput Studies of Molecular Motors. Lab on a Chip 2018, 18 (20), 3196–3206. https://doi.org/10.1039/C8LC00547H.
+
+
 ## quick start:
 
 1. Put your movie stacks belonging to the same experiment in a directory on your computer. You can also put the data in subdirectories. Any directory named `ignore` or `eval-old` will be ignored. Supported data formats are: tiff stack (.tif), a folder with many single tiff images, MataMorph stack (.stk), Nikon NIS-Elements Advanced Research (.nd2).

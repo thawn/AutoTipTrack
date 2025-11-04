@@ -1,4 +1,7 @@
 # AutoTipTrack
+
+[![DOI](https://zenodo.org/badge/140445240.svg)](https://doi.org/10.5281/zenodo.17520296)
+
 A software algorithm for the automated analysis of in vitro gliding motility assays.
 
 ## Citation

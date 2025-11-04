@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Korten"
+  given-names: "Till"
+  orcid: "https://orcid.org/0000-0002-2315-9247"
+title: "AutoTipTrack"
+version: 1.0.0
+doi: 10.5281/zenodo.17520297
+date-released: 2018-09-11
+url: "https://github.com/thawn/AutoTipTrack"
+preferred-citation:
+  type: article
+  title: An automated in vitro motility assay for high-throughput studies of molecular motors
+  journal: Lab on a Chip
+  issue: 20
+  pages: 3196-3206
+  volume: 18
+  url: https://pubs.rsc.org/en/content/articlelanding/2018/lc/c8lc00547h
+  authors: 
+    - family-names: Korten
+      given-names: Till
+    - family-names: Tavkin
+      given-names: Elena
+    - family-names: Scharrel
+      given-names: Lara
+    - family-names: Singh-Kushwaha
+      given-names: Vandana
+    - family-names: Diez
+      given-names: Stefan
+  year: 2018
+  identifiers: 
+    - type: doi
+      value: 10.1039/C8LC00547H
